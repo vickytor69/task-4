@@ -1,0 +1,39 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Step 1: Load the properly formatted CSV file
+data = pd.read_csv("spam.csv", encoding='latin-1')  # This file must have 'label' and 'message' columns
+
+# Step 2: If your CSV doesn't have headers, uncomment the next line:
+# data.columns = ['label', 'message']
+
+# Step 3: Convert labels to numeric values (ham=0, spam=1)
+data['label'] = data['label'].map({'ham': 0, 'spam': 1})
+
+# Step 4: Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    data['message'], data['label'], test_size=0.2, random_state=42
+)
+
+# Step 5: Vectorize text messages into numbers
+vectorizer = CountVectorizer()
+X_train_counts = vectorizer.fit_transform(X_train)
+X_test_counts = vectorizer.transform(X_test)
+
+# Step 6: Train the Naive Bayes classifier
+model = MultinomialNB()
+model.fit(X_train_counts, y_train)
+
+# Step 7: Predict on test data
+y_pred = model.predict(X_test_counts)
+
+# Step 8: Evaluate the model
+print("✅ Spam Detection Model Evaluation")
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
